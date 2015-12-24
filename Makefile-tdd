@@ -1,0 +1,24 @@
+.PHONY: test test-once build
+
+wait-for-changes = inotifywait -qq --event close_write,moved_to,create --recursive SOURCE1.FILE ./SOURCE2/ ./SOURCE3/
+build = compile src...
+build-test = compile test src...
+run-test = run compiled test...
+
+build:
+	@echo "Building..."
+	@$(build)
+	@echo "Done."
+
+test:
+	@while : ; do \
+		make test-once --quiet & \
+		$(wait-for-changes); \
+		kill "$$!" 2> /dev/null; \
+	done
+
+test-once:
+	@echo "Building..."
+	@$(build-test)
+	clear;
+	@$(run-test)
